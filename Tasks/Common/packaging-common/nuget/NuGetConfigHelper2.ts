@@ -43,7 +43,7 @@ export class NuGetConfigHelper2 {
 
     public ensureTempConfigCreated() {
         // save nuget config file to agent build directory
-        console.log(tl.loc("Info_SavingTempConfig"));
+        tl.debug(tl.loc("Info_SavingTempConfig"));
 
         let tempNuGetConfigDir = path.dirname(this.tempNugetConfigPath);
         if (!tl.exist(tempNuGetConfigDir)) {
@@ -144,14 +144,16 @@ export class NuGetConfigHelper2 {
 
     private getTempNuGetConfigPath(): string {
         const tempNuGetConfigBaseDir = NuGetConfigHelper2.getTempNuGetConfigBasePath();
-        const tempNuGetConfigFileName = "tempNuGet_" + tl.getVariable("build.buildId") + ".config";
+        // Changing this to standard name of nuget.config. In one of the tasks, dotnet add command is being used and
+        // add command does not take the name of the config file as parameter. It assumes default name.
+        // This won't impact anything as this file is anyway deleted right after the operation.
+        const tempNuGetConfigFileName =  "nuget.config";
         return path.join(tempNuGetConfigBaseDir, "Nuget", tempNuGetConfigFileName);
     }
 
     public getSourcesFromTempNuGetConfig(): IPackageSource[] {
         // load content of the user's nuget.config
         let configPath: string = this.tempNugetConfigPath ? this.tempNugetConfigPath : this.nugetConfigPath;
-
         if (!configPath)
         {
             return [];
@@ -198,7 +200,7 @@ export class NuGetConfigHelper2 {
 
     private convertToIPackageSource(source: auth.IPackageSourceBase): IPackageSource {
         const uppercaseUri = source.feedUri.toUpperCase();
-        const isInternal = this.authInfo.internalAuthInfo.uriPrefixes.some(prefix => uppercaseUri.indexOf(prefix.toUpperCase()) === 0);
+        const isInternal = this.authInfo.internalAuthInfo ? this.authInfo.internalAuthInfo.uriPrefixes.some(prefix => uppercaseUri.indexOf(prefix.toUpperCase()) === 0) : false;
 
         return {
             feedName: source.feedName,

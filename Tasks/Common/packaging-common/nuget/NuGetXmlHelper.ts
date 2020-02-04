@@ -18,6 +18,7 @@ export class NuGetXmlHelper implements INuGetXmlHelper {
             if (xml) {
                 NuGetXmlHelper._validateXmlIsConfiguration(xml);
                 let xmlPackageSources = NuGetXmlHelper._getOrCreateLastElement(xml, "packageSources");
+                xmlPackageSources.c("clear");
                 let xmlSource = xmlPackageSources.c("add", {
                     key: name,
                     value: source
